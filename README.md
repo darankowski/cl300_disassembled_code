@@ -14,3 +14,8 @@ The main reason for this was to see:
   * what the "Givarfel" error means in practice (also still don't know ;) )
   * how to use the serial pomp in this controller (this one at least the code helped me to understand the communication)
 
+The code is compatible with the "asem51" assembler: http://plit.de/asem-51/
+
+Unfortunately, the MCS-51 environment is new to me (privately, I always used other architectures for all MCU projects),
+so I'm not sure what is the "industrial standard" for this (except Keil products). Plus it's an old and obsolete
+architecture so it's hard to find something new for this. ;)
