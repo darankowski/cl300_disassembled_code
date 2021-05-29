@@ -1652,7 +1652,6 @@ call_08e5:
 		SUBB	A, R2
 		MOV	R2, A
 		JB	ACC7, jump_0922
-; ##### START CHECK
 		CLR	C
 		CLR	A
 		MOVC	A, @A+DPTR
@@ -1676,7 +1675,6 @@ jump_090d:
 		ADDC	A, R2
 		ADD	A, R2
 		MOV	DPH, A
-; ###### END CHECK
 jump_0917:
 		MOV	A, #001h
 		MOVC	A, @A+DPTR
@@ -9825,7 +9823,7 @@ jump_3dab:
 		LJMP	jump_3c0e
 
 
-; I'm don't know what those values represent, but for some reason there are defined here and copied by code to IRAM
+; I don't know what those values represent, but for some reason there are defined here and copied by code to IRAM
 
 const_start:
 		DW	0000h, 0000h, 0000h, 0000h
