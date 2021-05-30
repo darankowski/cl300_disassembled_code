@@ -1,39 +1,24 @@
 $NOMOD51
 $INCLUDE (mcu/83c552.mcu)
 
-; bit definitions
-ACC0		BIT	0E0h
-ACC3		BIT	0E3h
-ACC4		BIT	0E4h
-ACC6		BIT	0E6h
-ACC7		BIT	0E7h
-
-BCC0		BIT	0F0h
-BCC1		BIT	0F1h
-BCC2		BIT	0F2h
-BCC3		BIT	0F3h
-BCC6		BIT	0F6h
-BCC7		BIT	0F7h
-
-
 ; heat pump definitions
-CMPRSR_RLY	BIT	CT1I			; P1.1
-WW_RLY		BIT	T2			; P1.4
 EXT_RLY		BIT	CT0I			; P1.0
+CMPRSR_RLY	BIT	CT1I			; P1.1
 H_PUMP_RLY	BIT	CT2I			; P1.2
-C_PUMP_RLY	BIT	RT2			; P1.5
 CMPRSR_CHK	BIT	CT3I			; P1.3
+WW_RLY		BIT	T2			; P1.4
+C_PUMP_RLY	BIT	RT2			; P1.5
 
-EXT_SW		BIT	CMT1			; P4.7
-PRESSO_L_SW	BIT	CMT0			; P4.6
 PRESSO_H_SW	BIT	CMSR5			; P4.5
+PRESSO_L_SW	BIT	CMT0			; P4.6
+EXT_SW		BIT	CMT1			; P4.7
 
 ; panel
-PANEL_DOUT	BIT	CMSR4			; P4.4
-PANEL_PL	BIT	CMSR3			; P4.3
-PANEL_CLK	BIT	CMSR2			; P4.2
-PANEL_DIN	BIT	CMSR1			; P4.1
 PANEL_STROBE	BIT	CMSR0			; P4.0
+PANEL_DIN	BIT	CMSR1			; P4.1
+PANEL_CLK	BIT	CMSR2			; P4.2
+PANEL_PL	BIT	CMSR3			; P4.3
+PANEL_DOUT	BIT	CMSR4			; P4.4
 
 ; serial flash
 
@@ -42,11 +27,11 @@ FLASH_DIN	BIT	T1			; P3.5
 FLASH_CLK	BIT	WR			; P3.6
 FLASH_CS	BIT	RD			; P3.7
 
-
 ; some constants?
 iram_start	EQU	008h		; 
 vars_start	EQU	048h		; assuming here are some important variables
 sp_init		EQU	054h		; start address for SP
+timer_init	EQU	4C0Bh		; with oscillator 11.0592 MHz it looks like interrupt every ~50ms
 
 ; known functions:
 ; call_0091	; arguments in registers:	none
@@ -117,17 +102,15 @@ ORG T2OVER
 
 START:
 		MOV	A, #000h
-		MOV	C, ACC3
+		MOV	C, ACC.3
 		MOV	RS0, C
-		MOV	C, ACC4
+		MOV	C, ACC.4
 		MOV	RS1, C
 		
 		MOV	SP, #sp_init
 		LCALL	call_0091
 
 		LCALL	call_094c
-
-
 
 		SETB	EA
 		MOV	R1, #000h
@@ -312,7 +295,7 @@ jump_018c:
 		JNC	jump_0199
 		DEC	R0
 		MOV	A, @R0
-		SETB	ACC0
+		SETB	ACC.0
 		MOV	@R0, A
 jump_0199:
 		DJNZ	R4, jump_0187
@@ -323,7 +306,7 @@ jump_019b:
 		MOV	R1, A
 		MOV	R4, #004h
 		CLR	C
-		JB	BCC2, jump_01c2
+		JB	B.2, jump_01c2
 jump_01a7:
 		MOV	A, @R0
 		ADDC	A, @R1
@@ -353,8 +336,8 @@ jump_01c2:
 		DEC	R1
 		DJNZ	R4, jump_01c2
 		JNC	jump_01da
-		MOV	C, BCC0
-		MOV	BCC1, C
+		MOV	C, B.0
+		MOV	B.1, C
 		MOV	R0, SP
 		MOV	R1, #004h
 		CLR	C
@@ -398,12 +381,12 @@ jump_01fe:
 		MOV	A, R2
 		XCH	A, R3
 		MOV	R2, A
-		MOV	C, BCC1
+		MOV	C, B.1
 		RRC	A
-		MOV	C, BCC0
-		MOV	BCC1, C
+		MOV	C, B.0
+		MOV	B.1, C
 		RLC	A
-		MOV	BCC0, C
+		MOV	B.0, C
 		RET
 
 ;;;;;;;;;;;;;;;
@@ -425,18 +408,18 @@ jump_022b:
 		JZ	jump_02a4
 		CLR	C
 		SUBB	A, #07Fh
-		MOV	BCC3, C
+		MOV	B.3, C
 		MOV	A, R3
 		CLR	C
 		SUBB	A, #07Fh
-		ANL	C, BCC3
-		MOV	BCC3, C
+		ANL	C, B.3
+		MOV	B.3, C
 		MOV	A, R2
 		ADD	A, R3
 		CLR	C
 		SUBB	A, #07Fh
 		MOV	R2, A
-		ANL	C, BCC3
+		ANL	C, B.3
 		JNC	jump_0249
 		MOV	R2, #000h
 		SJMP	jump_02a4
@@ -474,7 +457,7 @@ jump_026a:
 		DJNZ	R1, jump_026a
 		JNC	jump_0278
 		MOV	B, A
-		MOV	BCC0, C
+		MOV	B.0, C
 		MOV	@R0, B
 jump_0278:
 		MOV	A, R4
@@ -488,7 +471,7 @@ jump_027f:
 		RRC	A
 		MOV	@R0, A
 		DJNZ	R1, jump_027f
-		JNB	ACC7, jump_0298
+		JNB	ACC.7, jump_0298
 		MOV	000h, R3
 		MOV	001h, R5
 		MOV	DPL, #004h
@@ -515,8 +498,8 @@ jump_02a4:
 		POP	005h
 		POP	004h
 		POP	003h
-		MOV	C, BCC2
-		MOV	BCC1, C
+		MOV	C, B.2
+		MOV	B.1, C
 		LJMP	jump_04b1
 
 
@@ -539,18 +522,18 @@ jump_02d2:
 jump_02d5:
 		CLR	C
 		SUBB	A, #07Fh
-		MOV	BCC3, C
+		MOV	B.3, C
 		MOV	A, R3
 		CLR	C
 		SUBB	A, #07Fh
-		ANL	C, BCC3
-		MOV	BCC3, C
+		ANL	C, B.3
+		MOV	B.3, C
 		MOV	A, R2
 		ADD	A, #07Fh
 		CLR	C
 		SUBB	A, R3
 		MOV	R2, A
-		ANL	C, BCC3
+		ANL	C, B.3
 		JNC	jump_02f0
 		MOV	R2, #000h
 		SJMP	jump_0361
@@ -632,7 +615,7 @@ jump_0350:
 		MOV	A, @R0
 		CLR	C
 		CPL	C
-		MOV	ACC0, C
+		MOV	ACC.0, C
 		MOV	@R0, A
 jump_0358:
 		POP	B
@@ -647,20 +630,20 @@ jump_0361:
 		POP	005h
 		POP	004h
 		POP	003h
-		MOV	C, BCC2
-		MOV	BCC1, C
+		MOV	C, B.2
+		MOV	B.1, C
 		LJMP	jump_04b1
 
 ;;;;;;;;;;;;;;;;
 
 call_0376:
 		MOV	A, R3
-		MOV	C, ACC7
-		SETB	ACC7
+		MOV	C, ACC.7
+		SETB	ACC.7
 		MOV	R3, A
 		MOV	A, R2
 		RLC	A
-		MOV	BCC0, C
+		MOV	B.0, C
 		CLR	C
 		SUBB	A, #07Fh
 		JNC	jump_038c
@@ -679,7 +662,7 @@ jump_038c:
 		MOV	R3, A
 		MOV	R4, A
 		MOV	R5, A
-		JB	BCC0, jump_03c8
+		JB	B.0, jump_03c8
 		DEC	R2
 		DEC	R3
 		DEC	R4
@@ -707,7 +690,7 @@ jump_03b1:
 		DJNZ	DPL, jump_03b1
 		DJNZ	R1, jump_03ab
 jump_03ba:
-		JNB	BCC0, jump_03c8
+		JNB	B.0, jump_03c8
 		MOV	R0, #005h
 		MOV	R1, #004h
 		CLR	C
@@ -728,10 +711,10 @@ jump_03c8:
 
 call_03cd:
 		MOV	DPL, #01Fh
-		CLR	BCC0
+		CLR	B.0
 		MOV	A, R2
-		JNB	ACC7, jump_03ea
-		SETB	BCC0
+		JNB	ACC.7, jump_03ea
+		SETB	B.0
 		MOV	R0, #005h
 		MOV	R1, #004h
 		CLR	C
@@ -743,7 +726,7 @@ jump_03dd:
 		DJNZ	R1, jump_03dd
 		SJMP	jump_03ea
 		MOV	DPL, #01Fh
-		CLR	BCC0
+		CLR	B.0
 jump_03ea:
 		MOV	A, R2
 		ORL	A, R3
@@ -753,7 +736,7 @@ jump_03ea:
 		RET
 jump_03f1:
 		MOV	A, R2
-		JB	ACC7, jump_0404
+		JB	ACC.7, jump_0404
 		MOV	R0, #005h
 		MOV	R1, #004h
 		DEC	DPL
@@ -772,11 +755,11 @@ jump_0404:
 		XCH	A, R5
 		MOV	A, DPL
 		ADD	A, #07Fh
-		MOV	C, BCC0
+		MOV	C, B.0
 		RRC	A
 		MOV	R2, A
 		MOV	A, R3
-		MOV	ACC7, C
+		MOV	ACC.7, C
 		MOV	R3, A
 		MOV	A, #001h
 		RET
@@ -787,13 +770,13 @@ jump_0404:
 
 call_0417:
 		MOV	A, R3
-		MOV	C, ACC7
-		SETB	ACC7
+		MOV	C, ACC.7
+		SETB	ACC.7
 		MOV	R3, A
 		MOV	A, R2
 		RLC	A
 		MOV	R2, A
-		MOV	BCC0, C
+		MOV	B.0, C
 		POP	000h
 		POP	001h
 		PUSH	003h
@@ -816,17 +799,17 @@ jump_043d:
 		DEC	R1
 		DJNZ	R6, jump_043d
 		MOV	A, R3
-		MOV	C, ACC7
-		SETB	ACC7
+		MOV	C, ACC.7
+		SETB	ACC.7
 		MOV	R3, A
 		MOV	A, R2
 		RLC	A
 		MOV	R2, A
-		MOV	BCC1, C
-		MOV	BCC2, C
-		MOV	C, BCC0
+		MOV	B.1, C
+		MOV	B.2, C
+		MOV	C, B.0
 		JNC	jump_0456
-		CPL	BCC2
+		CPL	B.2
 jump_0456:
 		POP	DPL
 		POP	DPH
@@ -859,7 +842,7 @@ jump_0478:
 		DEC	R0
 		DEC	R0
 		MOV	A, @R0
-		JNB	ACC7, jump_049d
+		JNB	ACC.7, jump_049d
 		MOV	R0, DPL
 		MOV	A, @R0
 		CLR	C
@@ -869,7 +852,7 @@ jump_0478:
 		DEC	R0
 		MOV	A, @R0
 		INC	R0
-		MOV	C, ACC0
+		MOV	C, ACC.0
 jump_048f:
 		MOV	R1, #003h
 jump_0491:
@@ -920,14 +903,14 @@ jump_04b1:
 		RET
 jump_04ca:
 		MOV	R1, A
-		MOV	C, BCC1
+		MOV	C, B.1
 		RRC	A
 		MOV	R2, A
 		MOV	A, R3
-		MOV	ACC7, C
+		MOV	ACC.7, C
 		MOV	R3, A
 		MOV	A, R1
-		MOV	C, BCC1
+		MOV	C, B.1
 		RET
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -949,7 +932,7 @@ call_04e3:
 		LCALL	call_0831
 		POP	B
 		JZ	jump_04fd
-		JNB	BCC6, jump_04f6
+		JNB	B.6, jump_04f6
 		MOV	R2, B
 jump_04f6:
 		MOV	A, R2
@@ -995,7 +978,7 @@ call_0519:
 		PUSH	ACC
 		LCALL	call_0831
 		POP	ACC
-		JNB	ACC6, jump_0529
+		JNB	ACC.6, jump_0529
 		MOV	R2, A
 jump_0529:
 		CLR	A
@@ -1035,7 +1018,7 @@ call_0548:
 		PUSH	ACC
 		LCALL	call_0831
 		POP	ACC
-		JNB	ACC6, jump_0558
+		JNB	ACC.6, jump_0558
 		MOV	R2, A
 jump_0558:
 		CLR	A
@@ -1067,7 +1050,7 @@ call_056c:
 		POP	B
 		INC	R3
 		JZ	jump_0586
-		JNB	BCC6, jump_0580
+		JNB	B.6, jump_0580
 		MOV	R2, B
 jump_0580:
 		CLR	A
@@ -1238,7 +1221,7 @@ call_06d3:
 		JNC	jump_06e5
 		MOV	B, R4
 		CLR	A
-		JNB	BCC7, jump_06e2
+		JNB	B.7, jump_06e2
 		MOV	A, #0FFh
 jump_06e2:
 		MOV	R2, A
@@ -1246,7 +1229,7 @@ jump_06e2:
 		RET
 jump_06e5:
 		MOV	A, R4
-		MOV	C, ACC7
+		MOV	C, ACC.7
 		RRC	A
 		MOV	R4, A
 		MOV	A, R5
@@ -1537,13 +1520,13 @@ call_083a:
 call_084f:
 		MOV	R1, #000h
 		MOV	A, R2
-		JNB	ACC7, jump_085c
+		JNB	ACC.7, jump_085c
 		MOV	R1, #001h
 		MOV	R0, #003h
 		LCALL	call_08b8
 jump_085c:
 		MOV	A, R4
-		JNB	ACC7, jump_0868
+		JNB	ACC.7, jump_0868
 		XRL	001h, #01H
 		MOV	R0, #005h
 		LCALL	call_08b8
@@ -1651,7 +1634,7 @@ call_08e5:
 		XCH	A, R2
 		SUBB	A, R2
 		MOV	R2, A
-		JB	ACC7, jump_0922
+		JB	ACC.7, jump_0922
 		CLR	C
 		CLR	A
 		MOVC	A, @A+DPTR
@@ -1661,7 +1644,7 @@ call_08e5:
 		MOVC	A, @A+DPTR
 		INC	DPTR
 		SUBB	A, R2
-		JB	ACC7, jump_0917
+		JB	ACC.7, jump_0917
 		INC	DPTR
 		INC	DPTR
 		MOV	A, R3
@@ -6336,16 +6319,16 @@ jump_267d:
 call_2690:
 		MOV	DPTR, #0000h
 		LCALL	call_09e0
-		SETB	EA
-		SETB	ET0
+		SETB	EA			; enable interrupts
+		SETB	ET0			; enable TMR0 interrupt
 		MOV	R3, #001h
-		MOV	TMOD, R3
-		CLR	TR0
-		MOV	R3, #04Ch
+		MOV	TMOD, R3		; 16-bit mode for TMR0
+		CLR	TR0			; stop timer
+		MOV	R3, #HIGH timer_init
 		MOV	TH0, R3
-		MOV	R3, #00Bh
+		MOV	R3, #LOW timer_init
 		MOV	TL0, R3
-		SETB	TR0
+		SETB	TR0			; start timer
 		MOV	R1, #000h
 		LCALL	call_0c74
 		MOV	R1, #000h
@@ -6584,9 +6567,9 @@ TMR0_SUBCALL:
 		MOV	DPTR, #0000h
 		LCALL	call_09e0
 		CLR	ET0
-		MOV	R3, #04Ch
+		MOV	R3, #HIGH timer_init
 		MOV	TH0, R3
-		MOV	R3, #00Bh
+		MOV	R3, #LOW timer_init
 		MOV	TL0, R3
 		SETB	ET0
 		SETB	TR0
